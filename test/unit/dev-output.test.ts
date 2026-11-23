@@ -1,0 +1,32 @@
+import { it, expect, afterEach } from 'vitest';
+import { PassThrough } from 'node:stream';
+import fs from 'node:fs';
+import path from 'node:path';
+import { DevOutput } from '../../src/commands/dev-output.js';
+const cleanups: (() => void)[] = [];
+afterEach(() => { for (const f of cleanups.splice(0)) f(); });
+it('isolates both streams during setup, bounds disk storage, and exposes stderr after release', () => {
+  const stdout = new PassThrough(), stderr = new PassThrough();
+  let out = '', err = ''; stdout.on('data', c => out += c); stderr.on('data', c => err += c);
+  const logs = new DevOutput(true, stdout, stderr);
+  cleanups.push(() => { logs.close(); fs.rmSync(path.dirname(logs.file), { recursive: true, force: true }); });
+  for (let i = 0; i < 100; i++) logs.write('stdout', Buffer.alloc(65536, 'x'));
+  logs.write('stderr', Buffer.from('startup diagnostic\n'));
+  expect(out).toBe(''); expect(err).toBe('');
+  expect(fs.statSync(logs.file).size).toBeLessThanOrEqual(2 * 1024 * 1024);
+  expect(fs.statSync(logs.file + '.previous').size).toBeLessThanOrEqual(2 * 1024 * 1024);
+  logs.release(); expect(err).toContain('startup diagnostic');
+  logs.write('stdout', Buffer.from('GET /health 200\n'));
+  expect(out).toContain('GET /health 200');
+  logs.write('stderr', Buffer.from('runtime exception\n')); expect(err).toContain('runtime exception');
+});
+it('keeps successful framework health logs off the default terminal but preserves failures', () => {
+  const stdout = new PassThrough(), stderr = new PassThrough();
+  let out = '', err = ''; stdout.on('data', c => out += c); stderr.on('data', c => err += c);
+  const logs = new DevOutput(false, stdout, stderr);
+  cleanups.push(() => { logs.close(); fs.rmSync(path.dirname(logs.file), { recursive: true, force: true }); });
+  logs.release();
+  logs.write('stdout', Buffer.from('GET /health 200\nGET /health 503\nError: provider request failed\n'));
+  expect(out).toBe(''); expect(err).not.toContain('200'); expect(err).toContain('503'); expect(err).toContain('provider request failed');
+  expect(fs.readFileSync(logs.file, 'utf8')).toContain('GET /health 200');
+});

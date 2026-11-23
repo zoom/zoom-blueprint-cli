@@ -1,0 +1,8 @@
+# Security: Ensure .env files are never committed, even if explicitly added
+.env filter=git-crypt diff=git-crypt merge=binary
+.env.* filter=git-crypt diff=git-crypt merge=binary
+*.env filter=git-crypt diff=git-crypt merge=binary
+
+# Prevent accidental commits of secrets
+**/.env -diff
+**/.env.* -diff

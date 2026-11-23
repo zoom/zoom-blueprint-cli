@@ -1,0 +1,33 @@
+{
+  "name": "zoom-team-chatbot",
+  "version": "1.0.0",
+  "description": "A comprehensive Zoom Chat bot built with Node.js and Express",
+  "main": "src/server/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server/app.js",
+    "dev": "node --watch src/server/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "zoom",
+    "chatbot",
+    "team-chat",
+    "nodejs",
+    "express",
+    "webhook"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@upstash/redis": "^1.38.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0"
+  },
+  "engines": {
+    "node": "22.23.5"
+  }
+}

@@ -1,0 +1,34 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.zoom-agent-state/
+coverage/
+# Generated project workspace (default `zoom create` output). These are developers' own apps with
+# their own .env secrets — not CLI source — so keep them out of the CLI repo. (Scoped to the root so
+# it never hides a legitimate src/.../apps directory.)
+
+/apps/
+/meeting-assistant/
+
+# Never commit secrets - CLI root and any nested directories
+.env
+.env.local
+.env.*.local
+.env.*
+
+
+# Allow example environment files
+!.env.example
+!.env.*.example
+
+
+# Ensure apps directory .env files are never committed
+apps/**/.env
+apps/**/.env.*
+!apps/**/.env.example
+.claude/
+.vscode/
+.idea/
+build/
+__pycache__/

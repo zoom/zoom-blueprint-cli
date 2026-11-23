@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Setup Complete — Zoom Chat AI Bot</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: "Segoe UI", system-ui, Tahoma, sans-serif;
+        background: #f4f6fb;
+        color: #1a1a2e;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .card {
+        background: #fff;
+        max-width: 560px;
+        width: 100%;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(20, 40, 120, 0.12);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #e8f5e9;
+        color: #2e7d32;
+        font-weight: 600;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        margin-bottom: 1.25rem;
+      }
+      h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+      p.sub { color: #555; line-height: 1.55; margin-bottom: 1.5rem; }
+      h2 { font-size: 1rem; margin: 1.5rem 0 0.6rem; color: #315cff; }
+      ol { margin: 0 0 0.5rem 1.1rem; color: #333; line-height: 1.7; }
+      code {
+        background: #eef1f8; padding: 0.1rem 0.4rem; border-radius: 5px;
+        font-size: 0.9em;
+      }
+      .zoom-button {
+        display: inline-block; margin-top: 1.5rem; background: #315cff;
+        color: #fff; border: none; padding: 14px 28px; font-size: 16px;
+        font-weight: 600; border-radius: 8px; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(49, 92, 255, 0.3); transition: all 0.2s ease;
+      }
+      .zoom-button:hover { background: #274bd6; transform: translateY(-1px); }
+      .zoom-button:disabled { background: #b7c0e0; cursor: not-allowed; box-shadow: none; }
+      .note { margin-top: 1rem; font-size: 0.85rem; color: #888; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <span class="badge">✅ Authenticated</span>
+      <h1>You're all set!</h1>
+      <p class="sub">
+        Your Zoom app is installed and authenticated. The chatbot is ready to
+        respond in Zoom Chat.
+      </p>
+
+      <h2>Try it now</h2>
+      <ol>
+        <li>Open <strong>Zoom Chat Chat</strong> and start a chat with the bot.</li>
+        <li>Type <code>menu</code> to see the available services.</li>
+        <li>Try <strong>Research Assistant</strong> — ask a question and watch it reply.</li>
+        <li>Try <strong>Employee Appreciation</strong> — recognize a teammate with a form.</li>
+        <li>In a channel, <strong>@mention</strong> the bot to start a flow in a thread.</li>
+      </ol>
+
+      <button id="zoom-button" class="zoom-button">Open the bot in Zoom</button>
+      <p class="note" id="jid-note"></p>
+    </div>
+
+    <!-- Server-injected, non-secret config (Bot JID only) -->
+    <script src="/config.js"></script>
+    <script>
+      const chatbotJid = window.APP_CONFIG?.ZOOM_BOT_JID;
+      const note = document.getElementById("jid-note");
+
+      if (!chatbotJid) {
+        note.textContent = "Set ZOOM_BOT_JID in your .env to enable the deep link.";
+        document.getElementById("zoom-button").disabled = true;
+      }
+
+      document.getElementById("zoom-button").addEventListener("click", () => {
+        if (!chatbotJid) return;
+        // Zoom deep links require the "robot_" prefix and keep "@" unencoded.
+        // Strip any existing "robot_" so it isn't doubled.
+        const rawJid = chatbotJid.replace(/^robot_/, "");
+        const jidParam = encodeURIComponent(rawJid).replace(/%40/g, "@");
+        const link = `https://zoom.us/launch/chat?jid=robot_${jidParam}`;
+        window.open(link, "_blank", "noopener,noreferrer");
+      });
+    </script>
+  </body>
+</html>
